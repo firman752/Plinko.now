@@ -1,0 +1,733 @@
+
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plinko Futuristik</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+  background-color: #121212;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* Ganti dari flex-start */
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding-top: 40px;  /* Tambahkan padding atas agar lebih turun */
+}
+
+    /* Animasi Glow dan Bounce untuk tampilan futuristik */
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 5px red; }
+      50% { box-shadow: 0 0 20px #ff0077; }
+      100% { box-shadow: 0 0 5px #00ff99; }
+    }
+    @keyframes ballBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes slotGlow {
+      0%, 100% { box-shadow: 0 0 10px #ffcc00; }
+      50% { box-shadow: 0 0 20px #ffcc00; }
+    }
+    .pin {
+      animation: glowPulse 2s infinite;
+    }
+    .ball {
+      animation: ballBounce 0.5s infinite;
+    }
+    .slot {
+      animation: slotGlow 3s infinite;
+    }
+
+    .neon-button {
+      background: #00f0ff;
+      color: black;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .neon-button:hover {
+      background: #0ff;
+      box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+    }
+
+    .glow-border {
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff inset;
+    }
+
+    .neon-button {
+      background: #00f0ff;
+      color: black;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .neon-button:hover {
+      background: #0ff;
+      box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .game-area {
+      width: 350px;
+      height: 350px;
+      background-color: #222;
+      
+      margin-top: 30px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+    }
+
+ .pin {
+   width: 9px;
+   height: 9px;
+   background: white;
+   border-radius: 50%;
+   position: absolute;
+ }
+   
+    .ball {
+      width: 14px;
+      height: 14px;
+      background: #ffcc00;
+      border-radius: 50%;
+      position: absolute;
+      transition: top 0.2s ease-in-out, left 0.2s ease-in-out;
+    }
+    .win-notification {
+  position: absolute;
+  top: 150px; /* Posisi dari atas setelah tulisan PLINKO */
+  left: 50%; /* Posisi di tengah */
+  transform: translateX(-50%); /* Mengatur agar benar-benar di tengah */
+  width: 300px;
+  height: 30px;
+  padding: 5px;
+  background-color: #fbbf24;
+  color: black;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(255, 165, 0, 0.6);
+  z-index: 5;
+  display: none;
+}
+    .slot {
+      width: 36px;
+      height: 24px;
+      background-color: #ff0033;
+      color: #fff;
+      text-align: center;
+      font-size: 10px;
+      position: absolute;
+      bottom: 0;
+      border-radius: 4px;
+      box-shadow: 0 0 5px #ffcc00;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+    .glow {
+      box-shadow: 0 0 20px 5px #fbbf24;
+    }
+  </style>
+</head>
+
+  <audio id="bounceSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+  <audio id="winSound" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" preload="auto" loop></audio>
+
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50" id="loginScreen">
+  <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-xl shadow-xl w-full max-w-md glow-border">
+    <h2 class="text-cyan-400 text-2xl font-extrabold mb-6 text-center tracking-wide">Login / Registrasi</h2>
+    <label class="block text-sm text-cyan-300 mb-1">Nama Lengkap</label>
+    <input class="w-full mb-3 p-2 rounded bg-black text-white glow-border" id="loginNama" placeholder="Nama lengkap" type="text" />
+    <label class="block text-sm text-cyan-300 mb-1">Email</label>
+    <input class="w-full mb-3 p-2 rounded bg-black text-white glow-border" id="loginEmail" placeholder="Email aktif" type="email" />
+    <label class="block text-sm text-cyan-300 mb-1">Pilih Bank</label>
+    <select class="w-full mb-3 p-2 rounded bg-black text-white glow-border" id="loginBank">
+      <option value="">-- Pilih Bank --</option>
+      <option>DANA</option>
+      <option>OVO</option>
+      <option>GoPay</option>
+      <option>LinkAja</option>
+      <option>BRI</option>
+      <option>BCA</option>
+      <option>BNI</option>
+      <option>CIMB Niaga</option>
+    </select>
+    <label class="block text-sm text-cyan-300 mb-1">Nomor Bank</label>
+    <input class="w-full mb-3 p-2 rounded bg-black text-white glow-border" id="loginRekening" placeholder="Nomor rekening / no HP" type="text" />
+    <label class="block text-sm text-cyan-300 mb-1">Password</label>
+    <input class="w-full mb-3 p-2 rounded bg-black text-white glow-border" id="loginPassword" placeholder="Buat password" type="password" />
+    <label class="block text-sm text-cyan-300 mb-1">Konfirmasi Password</label>
+    <input class="w-full mb-5 p-2 rounded bg-black text-white glow-border" id="loginConfirm" placeholder="Ulangi password" type="password" />
+    <button class="neon-button w-full py-2 rounded" onclick="loginUser()">Daftar</button>
+  </div>
+</div>
+
+
+<div class="text-center text-white py-2 text-xl font-bold">🎰𝐊𝐫𝐞𝐝𝐢𝐭 𝐈𝐃𝐑 : <span id="saldo"></span></div>
+<div class="text-center mb-2">
+  <button onclick="toggleTopUp()" class="bg-green-500 px-3 py-1 rounded text-sm">Top Up</button>
+  <button onclick="showRiwayat()" class="bg-blue-500 px-3 py-1 rounded text-sm">Riwayat</button>
+  <button onclick="toggleWithdrawForm()" class="bg-red-500 px-3 py-1 rounded text-sm">Withdraw</button>
+  <button onclick="toggleSettings()" class="bg-gray-500 px-3 py-1 rounded text-sm">Setelan</button>
+</div>
+<!-- FORM PENGATURAN -->
+<div id="settingsForm" class="max-w-md mx-auto p-4 bg-gray-800 rounded mb-4 hidden">
+  <h2 class="font-bold text-lg mb-2">Pengaturan Akun</h2>
+  <div class="saldo mb-2">𝐊𝐫𝐞𝐝𝐢𝐭 𝐈𝐃𝐑 : 𝐑𝐩 <span id="saldoSetting">0</span></div>
+  <label class="block text-sm mb-1">Nama Anda</label>
+  <input id="inputNama" type="text" class="w-full mb-2 p-1 rounded text-black" />
+  <label class="block text-sm mb-1">Password</label>
+  <input id="inputPassword" type="password" class="w-full mb-2 p-1 rounded text-black" />
+  <label class="block text-sm mb-1">Bahasa</label>
+  <select id="selectBahasa" class="w-full mb-2 p-1 rounded text-black">
+    <option>Indonesia</option>
+    <option>English</option>
+    <option>Spanish</option>
+    <option>Arabic</option>
+    <option>Chinese</option>
+    <option>Russian</option>
+    <option>Japanese</option>
+    <option>Korean</option>
+    <option>Portuguese</option>
+    <option>German</option>
+  </select>
+  <button onclick="simpanPengaturan()" class="bg-yellow-400 w-full py-2 mb-2 rounded text-black font-bold">Simpan</button>
+  <button onclick="alert('Hubungi admin melalui WhatsApp: 083847556444')" class="bg-blue-500 w-full py-2 mb-2 rounded text-white font-bold">Hubungi Bantuan</button>
+  <button onclick="logout()" class="bg-red-600 w-full py-2 rounded text-white font-bold">Log Out</button>
+</div>
+
+<!-- Form Top Up -->
+<div id="topupForm" class="max-w-md mx-auto p-4 bg-gray-800 rounded mb-4 hidden">
+  <h2 class="font-bold text-lg mb-2">Form Top Up</h2>
+  <label class="block text-sm mb-1">Pilih Metode Pembayaran</label>
+  <select id="metodePembayaran" class="w-full mb-2 p-1 rounded text-black">
+    <option>Pilih bank</option>
+    <option>DANA</option>
+    <option>OVO</option>
+    <option>GoPay</option>
+    <option>LinkAja</option>
+    <option>BRI</option>
+    <option>BCA</option>
+    <option>BNI</option>
+  </select>
+
+  <div id="infoPembayaran" class="bg-gray-700 text-sm p-2 rounded mb-2 hidden">
+    <div class="mb-1">Nomor Tujuan Pembayaran:</div>
+    <div class="flex items-center justify-between bg-gray-800 px-3 py-1 rounded">
+      <span id="nomorPembayaran" class="text-yellow-400 font-bold">-</span>
+      <button onclick="salinNomor()" class="text-blue-400 hover:underline text-xs">Salin</button>
+    </div>
+  </div>
+
+  <label class="block text-sm mb-1">Nominal</label>
+  <input id="nominalPembayaran" type="number" class="w-full mb-2 p-1 rounded text-black" />
+
+  <label class="block text-sm mb-1">Nama Pengirim</label>
+  <input id="namaPengirim" type="text" class="w-full mb-2 p-1 rounded text-black" />
+
+  <label class="block text-sm mb-1">Unggah Bukti Pembayaran</label>
+  <input id="buktiPembayaran" type="file" class="w-full mb-2 p-1 rounded text-black bg-white" />
+
+  <button onclick="kirimPembayaran()" class="bg-yellow-500 w-full py-2 rounded font-bold text-black">Kirim</button>
+</div>
+
+
+<!-- Form Penarikan -->
+<div id="withdrawForm" class="max-w-md mx-auto p-4 bg-gray-800 rounded mb-4 hidden">
+  <h2 class="font-bold text-lg mb-2">Form Penarikan</h2>
+  <label class="block text-sm mb-1">Pilih Metode Pembayaran</label>
+  <select id="withdrawBank" class="w-full mb-2 p-1 rounded text-black">
+    <option>pilih</option>
+    <option>DANA</option>
+    <option>OVO</option>
+    <option>GoPay</option>
+    <option>LinkAja</option>
+    <option>BRI</option>
+    <option>BCA</option>
+    <option>BNI</option>
+    <option>CIMB Niaga</option>
+  </select>
+  <label class="block text-sm mb-1">Nama Penerima</label>
+  <input id="namaPenerima" type="text" class="w-full mb-2 p-1 rounded text-black" required />
+  <label class="block text-sm mb-1">Nominal Penarikan (Minimal Rp 100,000)</label>
+  <input id="nominalPenarikan" type="number" class="w-full mb-2 p-1 rounded text-black" min="100.000" required />
+  <label class="block text-sm mb-1">PIN Pembayaran</label>
+  <input id="pinPembayaran" type="password" class="w-full mb-2 p-1 rounded text-black" required />
+  <button onclick="prosesPenarikan()" class="bg-yellow-500 w-full py-2 rounded font-bold text-black">Tarik</button>
+</div>
+
+<!-- Riwayat -->
+<div id="riwayatBox" class="max-w-md mx-auto mt-4 px-4 hidden">
+  <div class="bg-gray-800 p-3 rounded">
+    <h2 class="font-bold mb-2">Riwayat Penarikan</h2>
+    <ul id="riwayatList" class="text-sm"></ul>
+  </div>
+</div>
+
+<div id="penarikanProses" class="max-w-md mx-auto text-center text-yellow-400 font-bold mt-2 hidden">
+  Penarikan sedang diproses...
+</div>
+
+<div id="story" class="hidden max-w-md mx-auto text-center text-green-400 font-bold mt-2">✅ Pembayaran berhasil! Saldo akan segera bertambah.</div>
+
+<div class="text-center text-white py-2 text-2xl font-bold">🄿🄻🄸🄽🄺🄾</div>
+<div class="flex justify-center mb-4">
+  <div class="game-area" id="gameBoard"></div>
+</div>
+
+<div class="max-w-md mx-auto px-4 text-white">
+  <div class="grid grid-cols-3 gap-2 text-sm mb-2">
+    <div>
+      <label class="block mb-1">𝘎𝘢𝘳𝘪𝘴</label>
+      <input type="number" id="rows" min="8" max="16" value="16" class="w-full p-1 rounded text-black" />
+    </div>
+    <div>
+      <label class="block mb-1">𝘛𝘰𝘵𝘢𝘭 𝘣𝘢𝘭𝘭𝘴</label>
+      <input type="number" id="balls" min="1" value="10" class="w-full p-1 rounded text-black" />
+    </div>
+    <div>
+      <label class="block mb-1">𝐷𝑜𝑢𝑏𝑙𝑒 𝑝𝑒𝑟𝑘𝑎𝑙𝑖𝑎𝑛</label>
+      <select id="risk" class="w-full p-1 rounded text-black">
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+      </select>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+    <div>
+      <label class="block mb-1">𝘉𝘦𝘵</label>
+      <input type="number" id="bet" value="500" class="w-full p-1 rounded text-black" />
+    </div>
+    <div>
+      <label class="block mb-1">𝑇𝑜𝑡𝑎𝑙 𝑇𝑎𝑟𝑢ℎ𝑎𝑛</label>
+      <input type="text" id="totalBet" disabled class="w-full p-1 rounded text-gray-400 bg-gray-700" />
+    </div>
+  </div>
+  <button onclick="startGame()" class="w-full bg-yellow-500 text-black py-3 mt-2 rounded font-bold">SPIN</button>
+</div>
+
+<script>
+const nomorBank = {
+  DANA: "083847556444", 
+  OVO: "083847556444",
+  GoPay: "083847556444",
+  LinkAja: "083847556444",
+  BRI: "577501057405530",
+  BCA: "577501057405530",
+  BNI: "577501057405530"
+};
+
+  const board = document.getElementById("gameBoard");
+  const betInput = document.getElementById("bet");
+  const ballInput = document.getElementById("balls");
+  const totalBet = document.getElementById("totalBet");
+  const saldoDisplay = document.getElementById("saldo");
+  const bounceSound = document.getElementById("bounceSound");
+  const jackpotSound = document.getElementById("jackpotSound");
+  const explosionSound = document.getElementById("explosionSound");
+  const riwayatList = document.getElementById("riwayatList");
+
+  let saldo = parseInt(localStorage.getItem("saldo")) || 0;
+  let riwayat = [];
+
+  const multiplierLow = [0.2, 0.5, 0, 1.2, 1.5, 2];
+  const multiplierMedium = [1000, 1, 1, 2, 1, 2];
+  const multiplierHigh = [1, 0, 3, 2, 1, 2, 3000];
+
+  function updateSaldoDisplay() {
+    saldoDisplay.textContent = saldo;
+    localStorage.setItem("saldo", saldo);
+  }
+
+  function updateTotal() {
+    const bet = parseInt(betInput.value);
+    const balls = parseInt(ballInput.value);
+    totalBet.value = `Rp ${bet * balls}`;
+  }
+function toggleSettings() {
+  const form = document.getElementById("settingsForm");
+  form.classList.toggle("hidden");
+  document.getElementById("inputNama").value = localStorage.getItem("nama") || "";
+  document.getElementById("inputPassword").value = localStorage.getItem("password") || "";
+  document.getElementById("selectBahasa").value = localStorage.getItem("bahasa") || "Indonesia";
+  document.getElementById("saldoSetting").innerText = saldo;
+}
+
+function loginUser() {
+  const nama = document.getElementById("loginNama").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+
+  if (!nama || !password) {
+    alert("Data yang di isi salah periksa kembali.");
+    return;
+  }
+
+  localStorage.setItem("nama", nama);
+  localStorage.setItem("password", password);
+  document.getElementById("loginScreen").style.display = "none";
+  document.body.classList.remove("overflow-hidden");
+}
+function loginUser() {
+  const nama = document.getElementById("loginNama").value.trim();
+  const email = document.getElementById("loginEmail").value.trim();
+  const bank = document.getElementById("loginBank").value.trim();
+  const rekening = document.getElementById("loginRekening").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+
+  if (!nama || !email || !bank || !rekening || !password) {
+    alert("Semua data wajib diisi!");
+    return;
+  }
+
+  localStorage.setItem("nama", nama);
+  localStorage.setItem("email", email);
+  localStorage.setItem("bank", bank);
+  localStorage.setItem("rekening", rekening);
+  localStorage.setItem("password", password);
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.body.classList.remove("overflow-hidden");
+}
+
+
+function simpanPengaturan() {
+  const nama = document.getElementById("inputNama").value;
+  const password = document.getElementById("inputPassword").value;
+  const bahasa = document.getElementById("selectBahasa").value;
+  localStorage.setItem("nama", nama);
+  localStorage.setItem("password", password);
+  localStorage.setItem("bahasa", bahasa);
+  alert("Pengaturan berhasil disimpan.");
+  document.getElementById("settingsForm").classList.add("hidden");
+}
+
+function logout() {
+  if (confirm("Yakin ingin keluar?")) {
+    localStorage.removeItem("saldo");
+    localStorage.clear();
+    location.reload();
+  }
+}
+function toggleSettings() {
+  const form = document.getElementById("settingsForm");
+  form.classList.toggle("hidden");
+
+  document.getElementById("inputNama").value = localStorage.getItem("nama") || "";
+  document.getElementById("inputPassword").value = localStorage.getItem("password") || "";
+  document.getElementById("selectBahasa").value = localStorage.getItem("bahasa") || "Indonesia";
+  document.getElementById("saldoSetting").innerText = saldo;
+}
+function startGame() {
+  const rows = parseInt(document.getElementById("rows").value);
+  const balls = parseInt(document.getElementById("balls").value);
+  const bet = parseInt(document.getElementById("bet").value);
+  const risk = document.getElementById("risk").value;
+
+  if (risk === "Medium" && bet < 10000) {
+    alert("Minimal bet untuk perkalian 500 adalah Rp 25.000");
+    return;
+  }
+  if (risk === "High" && bet < 20000) {
+    alert("Minimal bet untuk perkalian 1000 adalah Rp 50.000");
+    return;
+  }
+
+  const total = bet * balls;
+  if (saldo < total) {
+    alert("Saldo tidak cukup");
+    return;
+  }
+
+  saldo -= total;
+  updateSaldoDisplay();
+  createBoard(rows);
+
+  for (let i = 0; i < balls; i++) {
+    setTimeout(() => dropBall(undefined, bet), i * 400);
+  }
+}
+
+function createBoard(rows = 16) {
+  const board = document.getElementById("gameBoard");
+  board.innerHTML = "";
+  const cols = 13;
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const pin = document.createElement("div");
+      pin.className = "pin";
+      const offsetX = (y % 2 === 0) ? 18 : 0;
+      pin.style.left = `${x * 27 + offsetX}px`;
+      pin.style.top = `${y * 25 + 20}px`;
+      board.appendChild(pin);
+    }
+  }
+  for (let i = 0; i < cols; i++) {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+    slot.style.left = `${i * 27}px`;
+    slot.innerText = `x${1}`; // default multiplier
+    board.appendChild(slot);
+  }
+}
+
+window.onload = () => {
+  const nama = localStorage.getItem("nama");
+  const email = localStorage.getItem("email");
+  const bank = localStorage.getItem("bank");
+  const rekening = localStorage.getItem("rekening");
+  const password = localStorage.getItem("password");
+
+  if (!nama || !email || !bank || !rekening || !password) {
+    document.getElementById("loginScreen").style.display = "flex";
+    document.body.classList.add("overflow-hidden");
+    return;
+  }
+
+  console.log("Login otomatis berhasil:", nama);
+  document.getElementById("loginScreen").style.display = "none";
+  document.body.classList.remove("overflow-hidden");
+    const defaultRows = parseInt(document.getElementById("rows").value) || 16;
+  createBoard(defaultRows);
+
+};
+
+
+  function toggleTopUp() {
+    document.getElementById("topupForm").classList.toggle("hidden");
+  }
+  document.getElementById("metodePembayaran").addEventListener("change", function() {
+  const metode = this.value;
+  const nomor = nomorBank[metode] || "-";
+  document.getElementById("nomorPembayaran").textContent = nomor;
+  document.getElementById("infoPembayaran").classList.remove("hidden");
+});
+  function salinNomor() {
+  const text = document.getElementById("nomorPembayaran").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Nomor berhasil disalin: " + text);
+  });
+}
+
+  function showRiwayat() {
+  document.getElementById("riwayatBox").classList.toggle("hidden");
+  updateRiwayat();
+}
+
+function updateRiwayat() {
+  riwayatList.innerHTML = "";
+  riwayat.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    riwayatList.appendChild(li);
+  });
+}
+
+  function toggleWithdrawForm() {
+    document.getElementById("withdrawForm").classList.toggle("hidden");
+  }
+
+  
+function kirimPembayaran() {
+  const nominal = parseInt(document.getElementById("nominalPembayaran").value);
+  const nama = document.getElementById("namaPengirim").value;
+  const file = document.getElementById("buktiPembayaran").files[0];
+
+  if (!nominal || !nama || !file) {
+    alert("Mohon lengkapi semua data pembayaran.");
+    return;
+  }
+
+  document.getElementById("topupForm").classList.add("hidden");
+
+  // Cek jika sudah ada elemen sebelumnya dan hapus dulu
+  const existingStatus = document.getElementById("verifikasiTopup");
+  if (existingStatus) existingStatus.remove();
+
+  const statusDiv = document.createElement("div");
+  statusDiv.id = "verifikasiTopup";
+  statusDiv.className = "text-center text-yellow-400 font-bold mt-2";
+  statusDiv.innerText = "⏳ Verifikasi bukti pembayaran... Mohon tunggu.";
+
+  // TEMPATKAN DI BAWAH TULISAN "PLINKO"
+  const plinkoTitle = document.querySelector('div.text-center.text-white.py-2.text-2xl.font-bold');
+  plinkoTitle.insertAdjacentElement("afterend", statusDiv);
+
+  // WAKTU VERIFIKASI: 10 DETIK
+  setTimeout(() => {
+    saldo += nominal;
+    updateSaldoDisplay();
+
+    statusDiv.innerText = `✅ Top up berhasil! Rp ${nominal.toLocaleString("id-ID")} telah ditambahkan ke saldo.`;
+
+    setTimeout(() => {
+      statusDiv.remove();
+    }, 5000);
+  }, 10000);
+}
+
+
+function prosesPenarikan() {
+    const bank = document.getElementById("withdrawBank").value;
+    const namaPenerima = document.getElementById("namaPenerima").value;
+    const nominal = parseInt(document.getElementById("nominalPenarikan").value);
+    const pin = document.getElementById("pinPembayaran").value;
+
+    if (!namaPenerima || !nominal || nominal < 100.000 || !pin) {
+      alert("Mohon lengkapi data penarikan dengan benar.");
+      return;
+    }
+
+    document.getElementById("penarikanProses").classList.remove("hidden");
+    setTimeout(() => {
+      saldo -= nominal;
+      updateSaldoDisplay();
+      document.getElementById("penarikanProses").classList.add("hidden");
+      alert("Penarikan sedang diproses. Mohon tunggu.");
+      document.getElementById("withdrawForm").classList.add("hidden");
+    }, 2000);
+  }
+
+  betInput.addEventListener("input", updateTotal);
+  ballInput.addEventListener("input", updateTotal);
+  updateTotal();
+
+  function getMultiplier() {
+    const risk = document.getElementById("risk").value;
+    if (risk === "Medium") return multiplierMedium[Math.floor(Math.random() * multiplierMedium.length)];
+    if (risk === "High") return multiplierHigh[Math.floor(Math.random() * multiplierHigh.length)];
+    return multiplierLow[Math.floor(Math.random() * multiplierLow.length)];
+  }
+
+    function createBoard(rows = 16) {
+    const board = document.getElementById("gameBoard");
+    board.innerHTML = "";
+    const cols = 13;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const pin = document.createElement("div");
+        pin.className = "pin";
+        const offsetX = (y % 2 === 0) ? 18 : 0;
+        pin.style.left = `${x * 27 + offsetX}px`;
+        pin.style.top = `${y * 25 + 20}px`;
+        board.appendChild(pin);
+      }
+    }
+    
+    for (let i = 0; i < cols; i++) {
+      const slot = document.createElement("div");
+      slot.className = "slot";
+      slot.style.left = `${i * 27}px`;
+      const multiplier = getMultiplier(); // Ambil multiplier sesuai dengan pengaturan
+      slot.innerText = `x${multiplier}`; // Tampilkan multiplier
+      slot.dataset.multiplier = multiplier; // Simpan multiplier di atribut data-multiplier
+      board.appendChild(slot);
+    }
+  }
+  
+function dropBall(xStart = 180, bet = 5000) {
+  const board = document.getElementById("gameBoard");
+  const ball = document.createElement("div");
+  ball.className = "ball";
+  let x = xStart; // Posisi horizontal awal
+  let y = 0; // Posisi vertikal awal
+  let direction = Math.random() > 0.5 ? 1 : -1; // Mengatur arah acak untuk kiri atau kanan
+  board.appendChild(ball);
+  ball.style.left = `${x}px`;
+  ball.style.top = `${y}px`;
+
+  const bounceSound = document.getElementById("bounceSound");
+  const winSound = document.getElementById("winSound");
+
+  let step = 0;
+  const interval = setInterval(() => {
+    if (step >= 16) {
+      clearInterval(interval);
+
+      const col = Math.round(x / 27); // Memilih kolom berdasarkan posisi bola
+      const slot = board.querySelectorAll(".slot")[col]; // Mengambil slot di bawah bola
+      let multiplier = parseFloat(slot.dataset.multiplier); // Mengambil multiplier dari slot yang ada
+
+      const win = Math.floor(bet * multiplier); // Menghitung kemenangan berdasarkan taruhan dan multiplier
+
+      saldo += win;
+      updateSaldoDisplay();
+      showWinNotification(multiplier, win);
+
+      if (!isNaN(multiplier) && multiplier > 0) winSound.play();
+
+      slot.classList.add("shake");
+      setTimeout(() => slot.classList.remove("shake"), 800);
+
+      return;
+    }
+
+    y += 25; // Menambahkan pergerakan vertikal
+    x += direction * 13; // Menambahkan pergerakan horizontal dengan arah acak
+    x = Math.max(0, Math.min(330, x)); // Membatasi pergerakan bola agar tetap dalam batas papan
+    ball.style.top = `${y}px`;
+    ball.style.left = `${x}px`;
+
+    // Mengubah arah bola secara acak setelah setiap langkah
+    if (Math.random() > 0.9) {  // 10% kemungkinan bola akan berbalik arah
+      direction *= -1;
+    }
+
+    try {
+      bounceSound.currentTime = 0;
+      bounceSound.play();
+    } catch (err) {
+      console.warn('bounceSound error:', err);
+    }
+
+    step++;
+  }, 120); // Kecepatan pergerakan bola
+}
+
+  function showWinNotification(multiplier, win) {
+    const notification = document.createElement("div");
+    notification.className = "win-notification";
+    notification.innerHTML = `Win ${win} FUN <br> x${multiplier}`; // Menampilkan kemenangan dan multiplier
+    document.body.appendChild(notification);
+    notification.style.display = "block";
+    setTimeout(() => {
+      notification.remove();
+    }, 2000); // Menampilkan notifikasi selama 2 detik
+  }
+  
+</script>
+</body>
+</html>
+
+
+
+
